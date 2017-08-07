@@ -85,7 +85,7 @@ public class RxAdapter extends RecyclerView.Adapter<RxViewHolder> {
         return this;
     }
 
-    public void update(final List<Object> dt) {
+    public <T> void update(final List<T> dt) {
 
         Observable.from(dt)
                 .filter(new Func1<Object, Boolean>() {
@@ -96,10 +96,14 @@ public class RxAdapter extends RecyclerView.Adapter<RxViewHolder> {
                     }
                 })
                 .toList()
-                .subscribe(new Action1<List<Object>>() {
+                .subscribe(new Action1<List<T>>() {
                     @Override
-                    public void call(List<Object> ts) {
-                        RxAdapter.this.data = ts;
+                    public void call(List<T> ts) {
+
+                        for (T t: ts) {
+                            RxAdapter.this.data.add(t);
+                        }
+
                         notifyDataSetChanged();
                     }
                 });
