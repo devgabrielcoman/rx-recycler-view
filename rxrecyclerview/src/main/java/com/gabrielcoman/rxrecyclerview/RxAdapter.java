@@ -23,9 +23,9 @@ public class RxAdapter extends RecyclerView.Adapter<RxViewHolder> {
     // Variables
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private HashMap<Class, Integer> modelToRow = new HashMap<>();
-    private HashMap<Class, Action4<Integer, View, Object, Integer>> modelToRow2 = new HashMap<>();
-    private HashMap<Class, Action2<Integer, Object>> clickMap = new HashMap<>();
+    private HashMap<Class, Integer> classLayoutMap = new HashMap<>();
+    private HashMap<Class, Action4<Integer, View, Object, Integer>> classCustomizeMap = new HashMap<>();
+    private HashMap<Class, Action2<Integer, Object>> classClickMap = new HashMap<>();
 
     private List<Object> data = new ArrayList<>();
     private Action0 didReachEndCallback;
@@ -60,8 +60,8 @@ public class RxAdapter extends RecyclerView.Adapter<RxViewHolder> {
     }
 
     public <T> RxAdapter customizeRow (final int rowId, final Class<T> modelClass, final Action4<Integer, View, T, Integer> customise) {
-        modelToRow.put(modelClass, rowId);
-        modelToRow2.put(modelClass, new Action4<Integer, View, Object, Integer>() {
+        classLayoutMap.put(modelClass, rowId);
+        classCustomizeMap.put(modelClass, new Action4<Integer, View, Object, Integer>() {
             @Override
             public void call(Integer i, View view, Object o, Integer total) {
                 customise.call(i, view, (T) o, total);
@@ -71,7 +71,7 @@ public class RxAdapter extends RecyclerView.Adapter<RxViewHolder> {
     }
 
     public <T> RxAdapter didClickOnRow(final Class<T> modelClass, final Action2<Integer, T> click) {
-        clickMap.put(modelClass, new Action2<Integer, Object>() {
+        classClickMap.put(modelClass, new Action2<Integer, Object>() {
             @Override
             public void call(Integer integer, Object o) {
                 click.call(integer, (T) o);
@@ -92,7 +92,7 @@ public class RxAdapter extends RecyclerView.Adapter<RxViewHolder> {
                     @Override
                     public Boolean call(Object item) {
                         Class itemClass = item.getClass();
-                        return modelToRow.containsKey(itemClass);
+                        return classLayoutMap.containsKey(itemClass);
                     }
                 })
                 .toList()
@@ -117,7 +117,7 @@ public class RxAdapter extends RecyclerView.Adapter<RxViewHolder> {
     public int getItemViewType(int position) {
         Object object = data.get(position);
         Class aClass = object.getClass();
-        return modelToRow.get(aClass);
+        return classLayoutMap.get(aClass);
     }
 
     @Override
@@ -132,14 +132,16 @@ public class RxAdapter extends RecyclerView.Adapter<RxViewHolder> {
         final Object object = data.get(pos);
         Class aClass = object.getClass();
         View viewHolder = holder.itemView;
-        Action4<Integer, View, Object, Integer> action = modelToRow2.get(aClass);
-        action.call(position, viewHolder, object, data.size());
+        Action4<Integer, View, Object, Integer> action = classCustomizeMap.get(aClass);
+        if (action != null) {
+            action.call(position, viewHolder, object, data.size());
+        }
 
         if (position == data.size() - 1 && didReachEndCallback != null) {
             didReachEndCallback.call();
         }
 
-        final Action2<Integer, Object> click = clickMap.get(aClass);
+        final Action2<Integer, Object> click = classClickMap.get(aClass);
 
         viewHolder.setOnClickListener(new View.OnClickListener() {
             @Override
