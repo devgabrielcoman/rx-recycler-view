@@ -86,10 +86,11 @@ public class RxAdapter extends RecyclerView.Adapter<RxViewHolder> {
     }
 
     public <T> void update(final List<T> dt) {
-
-        //
-        // remove all
         RxAdapter.this.data = new ArrayList<>();
+        this.add(dt);
+    }
+
+    public <T> void add(final List<T> dt) {
 
         // start again
         Observable.from(dt)
