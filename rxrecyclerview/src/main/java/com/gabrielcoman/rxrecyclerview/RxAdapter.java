@@ -87,6 +87,11 @@ public class RxAdapter extends RecyclerView.Adapter<RxViewHolder> {
 
     public <T> void update(final List<T> dt) {
 
+        //
+        // remove all
+        RxAdapter.this.data = new ArrayList<>();
+
+        // start again
         Observable.from(dt)
                 .filter(new Func1<Object, Boolean>() {
                     @Override
@@ -99,11 +104,7 @@ public class RxAdapter extends RecyclerView.Adapter<RxViewHolder> {
                 .subscribe(new Action1<List<T>>() {
                     @Override
                     public void call(List<T> ts) {
-
-                        for (T t: ts) {
-                            RxAdapter.this.data.add(t);
-                        }
-
+                        RxAdapter.this.data.addAll(dt);
                         notifyDataSetChanged();
                     }
                 });
